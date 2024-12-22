@@ -23,21 +23,20 @@ function DataTable() {
   useEffect(() => {
     async function fetchData() {
       const { data: fetchedData, error: fetchError } = await supabase
-      .from(tableName)
-      .select('id, Vehicle_Number, created_at, image_url');
+        .from(tableName)
+        .select('id, Vehicle_Number, created_at, image_url')
+        .order('id', { ascending: false });
 
       if (fetchError) {
         console.error('Error fetching data:', fetchError);
         setError(fetchError.message);
         return;
       }
-
       if (fetchedData) {
         setData(fetchedData);
         setLastUpdated(new Date().toLocaleTimeString());
       }
     }
-
     fetchData();
 
     const intervalId = setInterval(fetchData, 3000);
@@ -46,38 +45,46 @@ function DataTable() {
   }, []);
 
   return (
-    <div className='p-4 h-[74vh]'>
+    <div className='p-4 h-[74vh] rounded-lg'>
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {data.length > 0 ? (
         <>
-          <p className='text-sm text-gray-500'>Last updated at: {lastUpdated}</p>
-          <table className="table-fixed border-collapse border border-gray-400 w-full text-center rounded-lg">
-            <thead className="border border-gray-400 bg-sky-200">
-              <tr className='p-6'>
-                <th className="border border-gray-400 w-12 p-4">ID</th>
-                <th className="border border-gray-400">Vehicle Number</th>
-                <th className="border border-gray-400">Created At</th>
-                <th className="border border-gray-400">Image URL</th>
+          <div className="">
+            <div className="py-1 bg-gray-200 w-[250px] rounded-full  flex items-center justify-center">
+
+              <span>Last updated at</span>
+              <span className="inline-flex items-center rounded-full ml-2 bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">
+              {lastUpdated}
+              </span>
+            </div>
+          </div>
+          <table className="table-fixed border-collapse w-full text-center rounded-xl mt-2">
+            <thead className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-t-lg">
+              <tr>
+                <th className="p-4 text-gray-700 w-12 rounded-tl-xl">ID</th>
+                <th className="p-4 text-gray-700 ">Vehicle Number</th>
+                <th className="p-4 text-gray-700 ">Created At</th>
+                <th className="p-4 text-gray-700 rounded-tr-xl">Image URL</th>
               </tr>
             </thead>
             <tbody>
               {data.map((row) => (
-                <tr key={row.id} className="border border-gray-400 p-2">
-                  <td className="border border-gray-400 p-2">{row.id}</td>
-                  <td className="border border-gray-400 p-2">{row.Vehicle_Number}</td>
-                  <td className="border border-gray-400 p-2">{new Date(row.created_at).toLocaleString()}</td>
-                  <td className="border border-gray-400 p-2">
-                    <div 
+                <tr key={row.id} className="hover:bg-gray-100 transition-colors rounded-lg">
+                  <td className="p-4 border-b border-gray-300 rounded-lg">{row.id}</td>
+                  <td className="p-4 border-b border-gray-300 rounded-lg ">{row.Vehicle_Number}</td>
+                  <td className="p-4 border-b border-gray-300 rounded-lg">{new Date(row.created_at).toLocaleString()}</td>
+                  <td className="p-4 border-b border-gray-300 rounded-lg">
+                    <div
                       onMouseEnter={() => setHoveredImage(row.image_url)}
                       onMouseLeave={() => setHoveredImage(null)}
-                      className="relative"
+                      className="relative rounded-lg"
                     >
-                      <a className='underline text-blue-500' href={row.image_url} target="_blank" rel="noopener noreferrer">
+                      <a className='text-blue-500 hover:underline' href={row.image_url} target="_blank" rel="noopener noreferrer">
                         view image
                       </a>
                       {hoveredImage === row.image_url && (
-                        <div className="absolute top-0 left-5 mt-2 p-2 bg-white border border-gray-300 shadow-lg z-10">
-                          <img src={row.image_url} alt="Preview" className="w-32 h-32 object-cover" />
+                        <div className="absolute top-0 left-5 mt-2 p-2 bg-white border border-gray-300 rounded-lg z-10">
+                          <img src={row.image_url} alt="Preview" className="w-32 h-32 object-cover rounded-md" />
                         </div>
                       )}
                     </div>
@@ -86,9 +93,10 @@ function DataTable() {
               ))}
             </tbody>
           </table>
+          <hr className="my-4 border-t border-gray-200 rounded-lg" />
         </>
       ) : (
-        <p>No data found. Seems there is an issue with the database!</p>
+        <p className='text-gray-500'>No data found. Seems there is an issue with the database!</p>
       )}
     </div>
   );
