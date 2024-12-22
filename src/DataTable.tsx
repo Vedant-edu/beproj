@@ -1,28 +1,41 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl: string = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey: string = import.meta.env.VITE_SUPABASE_KEY;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 const tableName = 'example_table';
 
+type TableRow = {
+  id: number;
+  Vehicle_Number: string;
+  created_at: string;
+  image_url: string;
+};
+
 function DataTable() {
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(null);
-  const [hoveredImage, setHoveredImage] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [data, setData] = useState<TableRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const { data: fetchedData, error: fetchError } = await supabase.from(tableName).select(`id, Vehicle_Number, created_at, image_url`);
+      const { data: fetchedData, error: fetchError } = await supabase
+      .from(tableName)
+      .select('id, Vehicle_Number, created_at, image_url');
+
       if (fetchError) {
         console.error('Error fetching data:', fetchError);
         setError(fetchError.message);
         return;
       }
-      setData(fetchedData);
-      setLastUpdated(new Date().toLocaleTimeString());
+
+      if (fetchedData) {
+        setData(fetchedData);
+        setLastUpdated(new Date().toLocaleTimeString());
+      }
     }
 
     fetchData();
@@ -48,37 +61,34 @@ function DataTable() {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, index) => (
-                <tr key={index} className="border border-gray-400 p-2">
-                  {Object.entries(row).filter(([key]) => key !== 'local_path').map(([key, value]) => (
-                    <td key={key} className="border border-gray-400 p-2">
-                      {key === 'image_url' ? (
-                        <div 
-                          onMouseEnter={() => setHoveredImage(value)}
-                          onMouseLeave={() => setHoveredImage(null)}
-                          className="relative"
-                        >
-                          <a className='underline text-blue-500' href={value} target="_blank" rel="noopener noreferrer">
-                            view image
-                          </a>
-                          {hoveredImage === value && (
-                            <div className="absolute top-0 left-5 mt-2 p-2 bg-white border border-gray-300 shadow-lg z-10">
-                              <img src={value} alt="Preview" className="w-32 h-32 object-cover" />
-                            </div>
-                          )}
+              {data.map((row) => (
+                <tr key={row.id} className="border border-gray-400 p-2">
+                  <td className="border border-gray-400 p-2">{row.id}</td>
+                  <td className="border border-gray-400 p-2">{row.Vehicle_Number}</td>
+                  <td className="border border-gray-400 p-2">{new Date(row.created_at).toLocaleString()}</td>
+                  <td className="border border-gray-400 p-2">
+                    <div 
+                      onMouseEnter={() => setHoveredImage(row.image_url)}
+                      onMouseLeave={() => setHoveredImage(null)}
+                      className="relative"
+                    >
+                      <a className='underline text-blue-500' href={row.image_url} target="_blank" rel="noopener noreferrer">
+                        view image
+                      </a>
+                      {hoveredImage === row.image_url && (
+                        <div className="absolute top-0 left-5 mt-2 p-2 bg-white border border-gray-300 shadow-lg z-10">
+                          <img src={row.image_url} alt="Preview" className="w-32 h-32 object-cover" />
                         </div>
-                      ) : (
-                        value
                       )}
-                    </td>
-                  ))}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </>
       ) : (
-        <p>No data found. Seems there is issue with the database!</p>
+        <p>No data found. Seems there is an issue with the database!</p>
       )}
     </div>
   );
