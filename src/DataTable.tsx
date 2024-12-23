@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import Footer from './Footer';
 
 const supabaseUrl: string = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey: string = import.meta.env.VITE_SUPABASE_KEY;
@@ -98,6 +99,7 @@ function DataTable() {
       ) : (
         <p className='text-gray-500'>No data found. Seems there is an issue with the database!</p>
       )}
+      <Footer />
     </div>
   );
 }
